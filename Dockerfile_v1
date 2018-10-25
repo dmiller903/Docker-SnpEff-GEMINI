@@ -1,0 +1,37 @@
+FROM continuumio/miniconda:4.4.10
+
+LABEL \
+  author="Dustin Miller" \
+  description="snpEff and GEMINI images with dependencies" \
+  maintainer="dustin_miller@byu.edu"
+
+# Setup ENV variables
+ENV \
+  SNPEFF_VERSION=4_3t \
+  SNPEFF_HOME=/opt/snpEff
+
+# Install libraries, download snpEff, and download/run GEMINI installer
+RUN \
+  apt-get update && apt-get install -y --no-install-recommends \
+    openjdk-8-jdk \
+    build-essential \
+    ca-certificates \
+    libncurses5-dev \
+    libncursesw5-dev \
+    wget \
+    tabix \
+    zlib1g-dev \
+    git \
+    unzip \
+  && rm -rf /var/lib/apt/lists/*n \
+  && wget --quiet -O snpEff_v${SNPEFF_VERSION}_core.zip \
+    http://downloads.sourceforge.net/project/snpeff/snpEff_v${SNPEFF_VERSION}_core.zip \
+  && unzip snpEff_v${SNPEFF_VERSION}_core.zip -d /opt/ \
+  && rm snpEff_v${SNPEFF_VERSION}_core.zip \
+  && wget https://raw.github.com/arq5x/gemini/master/gemini/scripts/gemini_install.py \
+  && python gemini_install.py /usr/local /usr/local/share/gemini
+
+# Update PATH to include Gemini
+ENV \
+  PATH="${PATH}:/usr/local/gemini/bin"
+  
